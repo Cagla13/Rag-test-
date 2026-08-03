@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akıllı Kredi Karar Motoru</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { 
+            background-color: #f0f4f3; 
+            font-family: 'Inter', sans-serif;  
+            color: #2c3e50;
+        }
+        
+        .card { 
+            border-radius: 20px; 
+            border: none; 
+            box-shadow: 0 10px 30px rgba(25, 135, 84, 0.08); 
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header-bg { 
+            background: linear-gradient(135deg, #198754 0%, #0f5132 100%);
+            color: white; 
+            padding: 40px 20px; 
+            position: relative;
+        }
+        
+        .header-bg::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 15px 15px 0;
+            border-style: solid;
+            border-color: #0f5132 transparent transparent transparent;
+        }
+
+        .form-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+        }
+
+        .input-group-text {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px 0 0 10px;
+            color: #198754;
+        }
+        
+        .form-control.has-icon {
+            border-radius: 0 10px 10px 0;
+        }
+
+        .custom-radio-group .btn {
+            border-radius: 8px;
+            padding: 8px 24px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .custom-radio-group .btn-check:checked + .btn {
+            background-color: #198754;
+            color: white;
+            border-color: #198754;
+            box-shadow: 0 4px 10px rgba(25, 135, 84, 0.3);
+        }
+
+        .btn-custom { 
+            background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+            color: white; 
+            font-weight: 600; 
+            border-radius: 12px; 
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(25, 135, 84, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-custom:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(25, 135, 84, 0.3);
+            color: white; 
+        }
+
+        .highlight-box { 
+            background-color: #f8f9fa; 
+            padding: 25px; 
+            border-radius: 15px; 
+            margin-top: 25px; 
+            border-left: 6px solid #198754; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #198754;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i { margin-right: 10px; font-size: 1.3rem; }
+    </style>
+</head>
+<body>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-8">
+            <div class="card">
+                <div class="header-bg text-center">
+                    <h2 class="fw-bold mb-2">Akıllı Kredi Karar Motoru</h2>
+                    <p class="mb-0 text-white-50 fs-5" style="font-weight: 300;">Yapay Zeka Destekli Anında Kredi Değerlendirme Sistemi</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form id="krediFormu">
+                        
+                        <div class="section-title">
+                            <i class="fa-solid fa-user-shield"></i> MÜŞTERİ BİLGİLERİ 
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12 text-start">
+                                <label class="form-label text-muted mb-2"><i class="fa-solid fa-id-card-clip me-1"></i> Başvuru Tipi <span class="text-danger fw-bold">*</span></label>
+                                <div class="d-flex custom-radio-group">
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="kullaniciTipi" id="btnMusteri" value="Müşteri" autocomplete="off" checked onchange="formuDuzenle()">
+                                        <label class="btn btn-outline-success" for="btnMusteri">Müşteri</label>
+        
+                                        <input type="radio" class="btn-check" name="kullaniciTipi" id="btnPersonel" value="Personel" autocomplete="off" onchange="formuDuzenle()">
+                                        <label class="btn btn-outline-success" for="btnPersonel">Personel</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0" id="musteriNoKutusu">
+                                <label class="form-label">Müşteri Numarası <span class="text-danger fw-bold">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                                    <input type="text" class="form-control has-icon" id="musteriNo" maxlength="8" placeholder="Örn: 12345678" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3 mb-md-0" id="personelNoKutusu" style="display: none;">
+                                <label class="form-label">Müşteri Numarası <span class="text-danger fw-bold">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-id-badge"></i></span>
+                                    <input type="text" class="form-control has-icon" id="personelNo" maxlength="8" placeholder="Örn: 12345678">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">T.C. Kimlik Numarası <span class="text-danger fw-bold">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-regular fa-id-card"></i></span>
+                                    <input type="text" class="form-control has-icon" id="tckn" maxlength="11" placeholder="" required>
+                                </div>
+                                <div id="tcknHata" class="text-danger mt-1 fw-bold" style="display: none; font-size: 0.8rem;">TC Kimlik numarası 11 haneli olmalıdır.</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Müşteri Adı <span class="text-danger fw-bold">*</span></label>
+                                <input type="text" class="form-control" id="ad" placeholder="Örn: Ahmet" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Müşteri Soyadı <span class="text-danger fw-bold">*</span></label>
+                                <input type="text" class="form-control" id="soyad" placeholder="Örn: Yılmaz" required>
+                            </div>
+                        </div>
+
+                        <div id="finansalDurumAlani">
+                            <hr class="my-4 opacity-25">
+                            <div class="section-title">
+                                <i class="fa-solid fa-wallet"></i> Finansal Durum
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label class="form-label">Aylık Net Maaş <span id="gelirYildiz" class="text-danger fw-bold">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control para-formati text-end fs-5 fw-semibold" id="gelir" placeholder="0" required>
+                                        <span class="input-group-text bg-success text-white border-success">₺</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Aylık Mevcut Giderler <span class="text-danger fw-bold">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control para-formati text-end fs-5 fw-semibold" id="gider" placeholder="0" required>
+                                        <span class="input-group-text bg-danger text-white border-danger">₺</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="highlight-box">
+                            <div class="section-title mb-4" style="color: #2c3e50;">
+                                <i class="fa-solid fa-hand-holding-dollar text-success"></i> KREDİ BAŞVURULARI BİLGİLERİ 
+                            </div>
+                            
+                            <div class="row align-items-center">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label class="form-label fw-bold">Talep Edilen Kredi Tutarı <span class="text-danger fw-bold">*</span></label>
+                                    <div class="input-group input-group-lg">
+                                        <input type="text" class="form-control para-formati text-end fw-bold text-success" id="krediTutari" placeholder="0" required>
+                                        <span class="input-group-text bg-white">₺</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6" id="vadeKutusu" style="display: none;">
+                                    <label class="form-label fw-bold">Talep Edilen Vade (Ay) <span class="text-danger fw-bold">*</span></label>
+                                    <div class="input-group input-group-lg">
+                                        <input type="text" class="form-control text-end fw-bold" id="vade" maxlength="2" placeholder="Örn: 12" required>
+                                        <span class="input-group-text bg-white">Ay</span>
+                                    </div>
+                                    <div id="vadeHata" class="text-danger mt-1 fw-bold" style="display: none; font-size: 0.85rem;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-5">
+                            <button type="submit" class="btn btn-custom py-3 d-flex justify-content-center align-items-center gap-2" id="btnGonder">
+                                <i class="fa-solid fa-microchip fs-4"></i> <span>Başvuruyu Tamamla ve Değerlendir</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="sonucModal" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 20px; border: none;">
+            <div class="modal-body text-center p-5">
+                
+                <div id="loadingDurumu" class="py-4">
+                    <div class="spinner-border text-success mb-4" role="status" style="width: 4rem; height: 4rem; border-width: 0.25rem;"></div>
+                    <h3 class="fw-bold text-success mb-3">başvurunuz onaya gönderiliyor</h3>
+                    <p class="text-muted fs-5">Llama 3.2 modelimiz başvuru metriklerini inceliyor.<br>Lütfen bekleyiniz.</p>
+                </div>
+
+                <div id="sonucDurumu" style="display: none;">
+                    <div id="sonucIkonu" class="mb-3"></div>
+                    <h2 id="sonucBaslik" class="fw-bold mb-3"></h2>
+                    <h5 id="sonucMesaji" class="text-muted mb-4 lh-base"></h5>
+                    
+                    <div class="ai-detay text-start" id="aiHesaplamaDetayi">
+                        <h6 class="text-success fw-bold border-bottom border-success border-opacity-25 pb-3 mb-3">
+                            <i class="fa-solid fa-chart-pie me-2"></i>AI Risk ve Analiz Raporu
+                        </h6>
+                        <ul class="mb-0 mt-2 list-unstyled fs-6" id="aiDetayListesi" style="line-height: 2;"></ul>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-3 mt-5">
+                        <button type="button" class="btn btn-outline-danger px-4 py-3 rounded-pill fw-bold" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-right-from-bracket me-2"></i> Çıkış
+                        </button>
+                        <button type="button" class="btn btn-secondary px-4 py-3 rounded-pill fw-bold" onclick="location.reload()">
+                            <i class="fa-solid fa-rotate-right me-2"></i> yeni bir kredi başvurusu gönder
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function formuDuzenle() {
+        const isPersonel = document.getElementById('btnPersonel').checked;
+        
+        $('#finansalDurumAlani').fadeIn();
+        $('#gider').attr('required', 'required'); 
+        
+        if (isPersonel) {
+            $('#musteriNoKutusu').hide();
+            $('#musteriNo').removeAttr('required').val('');
+
+            $('#personelNoKutusu').fadeIn();
+            $('#personelNo').attr('required', 'required');
+            
+            // HOCANIN İSTEDİĞİ: Arayüzde kutu tamamen boş ve disabled kalacak.
+            $('#gelir').val('').prop('disabled', true).removeAttr('required');
+            $('#gelirYildiz').hide(); 
+        } else {
+            $('#personelNoKutusu').hide();
+            $('#personelNo').removeAttr('required').val('');
+
+            $('#musteriNoKutusu').fadeIn();
+            $('#musteriNo').attr('required', 'required');
+            
+            $('#gelir').prop('disabled', false).attr('required', 'required');
+            $('#gelirYildiz').show();
+        }
+    }
+
+    $(document).ready(function() {
+        formuDuzenle();
+
+        $('.para-formati').on('input', function() {
+            let temizSayi = $(this).val().replace(/\D/g, ''); 
+            if (temizSayi !== '') {
+                $(this).val(new Intl.NumberFormat('tr-TR').format(temizSayi));
+            }
+            vadeKutusunuGuncelle();
+        });
+
+        $('#ad, #soyad').on('input', function() {
+            this.value = this.value.replace(/[0-9]/g, '');
+        });
+
+        $('#tckn').on('input blur', function() {
+            this.value = this.value.replace(/[^0-9]/g, ''); 
+            if (this.value.length > 0 && this.value.length < 11) {
+                $('#tcknHata').slideDown(200); 
+            } else {
+                $('#tcknHata').slideUp(200);   
+            }
+        });
+
+        function vadeKutusunuGuncelle() {
+            let kredi = parseFloat($('#krediTutari').val().replace(/\./g, '')) || 0;
+            if (kredi > 0) {
+                $('#vadeKutusu').fadeIn();
+            } else {
+                $('#vadeKutusu').fadeOut();
+                $('#vade').val('');
+                $('#vadeHata').slideUp();
+            }
+        }
+
+        function maxVadeGetir(kredi) {
+            if (kredi > 250000) return 12;
+            if (kredi > 125000) return 24;
+            return 36;
+        }
+
+        $('#musteriNo, #personelNo, #vade').on('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, ''); 
+        });
+
+        $('#krediTutari, #vade').on('input', function() {
+            let kredi = parseFloat($('#krediTutari').val().replace(/\./g, '')) || 0;
+            let girilenVade = parseInt($('#vade').val()) || 0;
+            let izinVerilenMaxVade = maxVadeGetir(kredi);
+
+            if (girilenVade > 72) {
+                $('#vade').val(72);
+                girilenVade = 72;
+            }
+
+            if (kredi > 0 && girilenVade > 0) {
+                if (girilenVade > izinVerilenMaxVade) {
+                    $('#vadeHata').html(`Hata: ${kredi.toLocaleString('tr-TR')} ₺ tutar için yasal azami vade <b>${izinVerilenMaxVade} aydır</b>. Lütfen vadeyi düşürün.`).slideDown(200);
+                } else {
+                    $('#vadeHata').slideUp(200);
+                }
+            } else {
+                $('#vadeHata').slideUp(200);
+            }
+        });
+
+        const sonucModalNesnesi = new bootstrap.Modal(document.getElementById('sonucModal'));
+
+        $('#krediFormu').on('submit', function(e) {
+            e.preventDefault(); 
+
+            if ($('#btnMusteri').is(':checked') && $('#musteriNo').val().length < 8) {
+                alert("Müşteri numarası en az 8 haneli olmalıdır.");
+                $('#musteriNo').focus();
+                return;
+            }
+
+            if ($('#tckn').val().length !== 11) {
+                $('#tcknHata').show();
+                $('#tckn').focus();
+                return;
+            }
+
+            let kredi = parseFloat($('#krediTutari').val().replace(/\./g, '')) || 0;
+            let girilenVade = parseInt($('#vade').val()) || 0;
+            let izinVerilenMaxVade = maxVadeGetir(kredi);
+
+            if (girilenVade < 1 || girilenVade > izinVerilenMaxVade) {
+                $('#vadeHata').html(`Hata: ${kredi.toLocaleString('tr-TR')} ₺ tutar için yasal azami vade <b>${izinVerilenMaxVade} aydır</b>. Lütfen vadeyi düşürün.`).slideDown(200);
+                $('#vade').focus();
+                return; 
+            } else {
+                $('#vadeHata').slideUp(200);
+            }
+
+            $('#btnGonder').prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Yapay Zeka İnceliyor...');
+            $('#loadingDurumu').show();
+            $('#sonucDurumu').hide();
+            sonucModalNesnesi.show();
+
+            const isPersonel = $('#btnPersonel').is(':checked');
+            
+            // HOCANIN İSTEDİĞİ: Arayüz boş kalıyor ama arka plana dummy bir değer (örn: 80.000 TL) yolluyoruz.
+            const temizGelir = isPersonel ? 80000 : (parseFloat($('#gelir').val().replace(/\./g, '')) || 0);
+            const temizGider = (parseFloat($('#gider').val().replace(/\./g, '')) || 0);
+
+            const formData = {
+                kullanici_tipi: $('input[name="kullaniciTipi"]:checked').val(),
+                musteri_no: isPersonel ? "-" : $('#musteriNo').val(),
+                personel_no: isPersonel ? $('#personelNo').val() : "-",
+                tckn: $('#tckn').val(),
+                ad: $('#ad').val(),
+                soyad: $('#soyad').val(),
+                aylik_gelir: temizGelir,
+                aylik_gider: temizGider,
+                basvurulan_kredi_tutari: kredi,
+                vade: girilenVade,
+                aylik_taksit_tutari: kredi / girilenVade
+            };
+
+            fetch('http://127.0.0.1:8000/api/v1/kredi-degerlendir', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Sunucu Yanıt Vermedi!");
+                return response.json();
+            })
+            .then(data => {
+                yapayZekaKarariniGoster(data, formData); 
+            })
+            .catch(error => {
+                $('#loadingDurumu').hide();
+                $('#sonucDurumu').show();
+                $('#sonucIkonu').html('<h1 style="color: #dc3545; font-size: 5rem;"><i class="fa-solid fa-triangle-exclamation"></i></h1>');
+                $('#sonucBaslik').text("Bağlantı Hatası").css("color", "#dc3545");
+                $('#sonucMesaji').text("Sisteme ulaşılamadı. Arka ucun çalıştığından emin olun.");
+                $('#aiHesaplamaDetayi').hide();
+            })
+            .finally(() => {
+                $('#btnGonder').prop('disabled', false).html('<i class="fa-solid fa-microchip fs-4"></i> <span>Başvuruyu Tamamla ve Değerlendir</span>');
+            });
+        });
+
+        // HOCANIN İSTEDİĞİ: ONAY/RED YERİNE DEĞERLENDİRME DURUMU GÖSTERİMİ
+        function yapayZekaKarariniGoster(data, orijinalData) {
+            $('#loadingDurumu').hide();
+            $('#sonucDurumu').fadeIn();
+            $('#aiHesaplamaDetayi').show();
+
+            const analiz = data.ai_analiz_sonucu || {};
+            const tip = analiz.kullanici_tipi || orijinalData.kullanici_tipi;
+            const isPersonel = tip.toLowerCase() === "personel";
+            const carpan = isPersonel ? 5 : 3;
+            
+            let detayHTML = `
+                <li><strong>AI Tespit Edilen Statü:</strong> ${tip} (Kredi Çarpanı: ${carpan}x)</li>
+                <li><strong>AI Tespit Edilen Maaş:</strong> ${analiz.aylik_gelir || orijinalData.aylik_gelir} TL</li>
+                <li><strong>Talep Edilen Kredi:</strong> ${analiz.basvurulan_kredi_tutari || orijinalData.basvurulan_kredi_tutari} TL</li>
+            `;
+            $('#aiDetayListesi').html(detayHTML);
+
+            if (data.onay_durumu === true || data.durum === "Onaylandı") {
+                $('#sonucIkonu').html('<h1 style="color: #198754; font-size: 5rem;"><i class="fa-solid fa-circle-check"></i></h1>');
+                $('#sonucBaslik').text("BAŞVURUNUZ DEĞERLENDİRMEYE ALINDI").css("color", "#198754");
+                $('#sonucMesaji').html(`Başvurunuz ön değerlendirme sonucunda detaylı inceleme için ilgili birime iletilmiştir. Gelir, gider ve kredi ödeme kapasiteniz uzman ekip tarafından değerlendirildikten sonra tarafınıza bilgilendirme yapılacaktır.`);
+            } else if (data.onay_durumu === false || data.durum === "Reddedildi") {
+                $('#sonucIkonu').html('<h1 style="color: #dc3545; font-size: 5rem;"><i class="fa-solid fa-circle-xmark"></i></h1>');
+                $('#sonucBaslik').text("BAŞVURUNUZ DEĞERLENDİRMEYE ALINMADI").css("color", "#dc3545");
+                $('#sonucMesaji').html(`<strong>Ön değerlendirme sonucu olumsuz:</strong> <br> ${data.mesaj || ''}`);
+            } else if (data.durum === "Hata") {
+                $('#sonucIkonu').html('<h1 style="color: #ffc107; font-size: 5rem;"><i class="fa-solid fa-triangle-exclamation"></i></h1>');
+                $('#sonucBaslik').text("SİSTEMSEL HATA").css("color", "#ffc107");
+                $('#sonucMesaji').html(`<strong>İşlem tamamlanamadı:</strong> <br> ${data.hata_detayi || data.mesaj}`);
+                $('#aiHesaplamaDetayi').hide();
+            } else {
+                $('#sonucIkonu').html('<h1 style="color: #6c757d; font-size: 5rem;"><i class="fa-solid fa-circle-question"></i></h1>');
+                $('#sonucBaslik').text("BİLİNMEYEN YANIT").css("color", "#6c757d");
+                $('#sonucMesaji').html(`Sistemden beklenen formatta yanıt alınamadı.`);
+            }
+        }
+    });
+</script>
+</body>
+</html>

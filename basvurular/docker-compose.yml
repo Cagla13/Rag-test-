@@ -1,0 +1,25 @@
+name: kredi-karar-motoru
+services:
+  api:
+    build: ./backend
+    container_name: kredi_karar_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./basvurular:/basvurular
+      - ./frontend:/frontend
+    depends_on:
+      - ollama_servisi
+    environment:
+      - OLLAMA_HOST=http://ollama_servisi:11434
+
+  ollama_servisi:
+    image: ollama/ollama:latest
+    container_name: kredi_karar_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+volumes:
+  ollama_data:

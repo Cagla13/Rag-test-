@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pydantic
+fpdf
+PyMuPDF
+langchain-ollama
+langchain-core
